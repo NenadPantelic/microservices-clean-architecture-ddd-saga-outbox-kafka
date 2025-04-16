@@ -140,3 +140,77 @@
 ![](images/order-service-hexagonal.png)<br>
 
 - Dependency inversion principle allows to revert any runtime dependency. It will lead to having an independent domain layer.
+
+## Domain-Driven Design
+
+- offers solutions to common problem when building an enterprise software
+- Domain model: a conceptual model of the domain that defines the behaviour and data of a system
+- the main idea is to separate the business model from the infrastructure
+- domain model - in the center of the software. Independent from other dependencies. Keep the domain model stable and independent of infrastructure components, so we can easily change and replace them, even adapt to new technologies easily.
+
+![](images/domain_driven_design.png) <br>
+
+- **Strategic DDD** vs **Tactical DDD**
+- `Strategic DDD`: introduces boundaries for domain model. Single Bounded context per each domain.
+  - What is a Domain? Operational area of your application, e.g. Online food ordering. Domain can have one or more subdomains depending on the logic.
+  - Bounded context: Central pattern in DDD. Bounded within a Domain. It will help to group the functionalities of a system. (e.g. order processing and payment processing)
+  - Ubiquitous Language: Common language used by domain experts and developers
+- `Tactical DDD`: implementation patterns
+
+  - **Entities**:
+
+    - Domain object with a unique identity (unique identifier assigned to it when created, remains unchanged; practically two entities with the same identifier are treated like having the same object even if all other fields are different).
+    - Embodies a set of critical business rules.
+    - They are mutable, it is possible to set value of their properties using a a well-defined state-change methods.
+
+  - **Aggregates:**
+
+    - Group of Entity objects which always need to be in consistent sate. Example: Order processing aggregate - order, order item and product.
+    - It should be retrieved and stored as a whole in a consistent state.
+
+  - **Aggregate Root (AR)**:
+
+    - Entry point Entity for an aggregate that should keep aggregate in a consistent state all the time.
+    - All business operations should go through the root.
+    - An Aggregate should be referenced from outside only through its root.
+    - AR should have pure, side-effetc free functions.
+    - Practically AR owns an Aggregate. An identifier of AR also identifies an Aggregate.
+    - AR is responsible to enforce business invariants.
+    - Since all state-changing operations should go through an AR, before saving an aggregate, it should enforce strict validations each time to keep the aggregate in consistent state.
+    - use data store constraints and optimistic locking to prevent data loss or corrupted data in case of conflicting updates by multiple threads
+    - how to choose AR from a group of Aggregates? Consider if the entitiy will be modified independently and can be accessed by the identifier from the outside (from other aggregates)
+
+  - **Value Objects**:
+
+    - Immutable objects without identity. If we want to change its value, we have to create a new object with updated value. That's why they are interchangeable - you can use two different VO with the same value for the same purpose.
+    - Only value matters.
+    - Brings context to the value (e.g. to keep a price of an order instead of BigDecimal). In this way we can have a business logic on Value objects through their methods (compared to primitive types for an example). Also, we can add validation in their constructors.
+
+  - **Domain Events**:
+
+    - Decouple different domains.
+    - Describe things that happen and change the state of a domain.
+    - Makes the system extendable.
+    - `Domain event listeners` run in a different transactionn than the event publishers.
+    - In a domain-driven system, the domain events are an excellent way of achieving an eventual consistency.
+    - Any system or module that needs to update itself when something happens in another module or system can subscribe to the domain events coming from that system.
+    - Event sourcing: keep the system as an ordered log of events (history)
+
+  - **Domain services**:
+
+    - Business logic that cannot fit in the aggregate.
+    - It coordinates the business logic that spans multiple aggregates. Also, we can put some business logic method in it if that method does not fit logically into an entity.
+    - Can interact with other domain services.
+    - It cannot be reached outside, it is in the core of the domain logic.
+
+  - **Application services**:
+    - allows the isolated domain to communicate with outside -> Interface with methods that the outside objects require and expose that interface. We need to implement this application service and accept the request.
+    - Orchestrate transaction, security, looking up proper aggregates and saving state changes of the domain to the database,neither domain service nor entities will load this data - it is application serivce's responsibility to get the data and pass it into the domain service or entities.
+    - Does not contain any business logic (domain service and entities contain the business logic).
+    - `Domain event listener` is a special kind of Application services that is triggered by domain events (not by an end user). Each domain event listener can have a separate domain service (which internall will call the entity to do some business logic) to handle the business logic.
+
+- Good books:
+  - **Domain-Drive Design** by Eric Evans
+  - **Implementing Domain-Driven Design** - by Vaughn Vernon
+
+![](images/order-service-domain-logic.png)

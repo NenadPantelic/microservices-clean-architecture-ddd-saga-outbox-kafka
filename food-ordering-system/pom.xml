@@ -20,6 +20,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>order-service</module>
+        <module>common</module>
     </modules>
 
     <properties>
@@ -60,6 +61,11 @@
             </dependency>
             <!-- order-container is not needed here as it will not be included in any module as dependency.
             It is just a container including all dependencies to create a container. -->
+            <dependency>
+                <groupId>com.food.ordering.system</groupId>
+                <artifactId>common-domain</artifactId>
+                <version>${project.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <dependencies></dependencies>
