@@ -214,3 +214,7 @@
   - **Implementing Domain-Driven Design** - by Vaughn Vernon
 
 ![](images/order-service-domain-logic.png)
+
+![](images/order-state-transitions.png)
+
+![](images/order-request-simple-flow.png)

@@ -68,7 +68,19 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-    <dependencies></dependencies>
+    <dependencies>
+        <!-- Logging as a dep, only needed in the domain-service, not in the domain-core -->
+        <!-- adding it here as these will be used application-wise -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-logging</artifactId>
+        </dependency>
+    </dependencies>
     <build>
         <plugins>
             <plugin>
