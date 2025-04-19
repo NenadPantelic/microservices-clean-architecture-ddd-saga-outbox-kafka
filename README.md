@@ -218,3 +218,7 @@
 ![](images/order-state-transitions.png)
 
 ![](images/order-request-simple-flow.png)
+
+- Every port will have its adapter in the domain layer or one of the infrastructure layers
+  - input ports: interfaces implemented in the domain layer and used by client of the domain layer
+  - output ports: interfaces implemented in the infrastructure layers (data access, messaging modules...) and used by the domain layer to reach those infrastructure layers

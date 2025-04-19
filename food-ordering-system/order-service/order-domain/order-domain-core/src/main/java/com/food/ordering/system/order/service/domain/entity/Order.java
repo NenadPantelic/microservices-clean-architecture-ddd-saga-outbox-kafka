@@ -9,7 +9,6 @@ import com.food.ordering.system.order.service.domain.valueobject.TrackingId;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 // OrderId will be inherited as id in Order class
 public class Order extends AggregateRoot<OrderId> {
@@ -91,7 +90,7 @@ public class Order extends AggregateRoot<OrderId> {
         Money orderItemsTotalPrice = items.stream()
                 .map(orderItem -> {
                     validateItemPrice(orderItem);
-                    return orderItem.getSubTotal();
+                    return orderItem.getSubtotal();
                 }).reduce(Money.ZERO, Money::add);
 
         if (!price.equals(orderItemsTotalPrice)) {
@@ -132,7 +131,7 @@ public class Order extends AggregateRoot<OrderId> {
     }
 
     private Order(Builder builder) {
-        super.setId(builder.id);
+        id = builder.id;
         customerId = builder.customerId;
         restaurantId = builder.restaurantId;
         deliveryAddress = builder.deliveryAddress;
@@ -142,7 +141,6 @@ public class Order extends AggregateRoot<OrderId> {
         orderStatus = builder.orderStatus;
         failureMessages = builder.failureMessages;
     }
-
 
     public CustomerId getCustomerId() {
         return customerId;
@@ -176,31 +174,51 @@ public class Order extends AggregateRoot<OrderId> {
         return failureMessages;
     }
 
+    public static Builder builder() {
+        return new Builder();
+    }
+
     public static final class Builder {
         private OrderId id;
-        private final CustomerId customerId;
-        private final RestaurantId restaurantId;
-        private final StreetAddress deliveryAddress;
-        private final Money price;
-        private final List<OrderItem> items;
+        private CustomerId customerId;
+        private RestaurantId restaurantId;
+        private StreetAddress deliveryAddress;
+        private Money price;
+        private List<OrderItem> items;
         private TrackingId trackingId;
         private OrderStatus orderStatus;
         private List<String> failureMessages;
 
-        private Builder(CustomerId customerId, RestaurantId restaurantId, StreetAddress deliveryAddress, Money price, List<OrderItem> items) {
-            this.customerId = customerId;
-            this.restaurantId = restaurantId;
-            this.deliveryAddress = deliveryAddress;
-            this.price = price;
-            this.items = items;
-        }
-
-        public static Builder builder(CustomerId customerId, RestaurantId restaurantId, StreetAddress deliveryAddress, Money price, List<OrderItem> items) {
-            return new Builder(customerId, restaurantId, deliveryAddress, price, items);
+        private Builder() {
         }
 
         public Builder id(OrderId val) {
             id = val;
+            return this;
+        }
+
+        public Builder customerId(CustomerId val) {
+            customerId = val;
+            return this;
+        }
+
+        public Builder restaurantId(RestaurantId val) {
+            restaurantId = val;
+            return this;
+        }
+
+        public Builder deliveryAddress(StreetAddress val) {
+            deliveryAddress = val;
+            return this;
+        }
+
+        public Builder price(Money val) {
+            price = val;
+            return this;
+        }
+
+        public Builder items(List<OrderItem> val) {
+            items = val;
             return this;
         }
 

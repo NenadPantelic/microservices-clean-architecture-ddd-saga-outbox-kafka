@@ -13,14 +13,15 @@ public class OrderItem extends BaseEntity<OrderItemId> {
     private final Product product;
     private final Integer quantity;
     private final Money price;
-    private final Money subTotal; // quantity * price
+    private final Money subtotal; // quantity * price
 
     private OrderItem(Builder builder) {
         super.setId(builder.id);
+        orderId = builder.orderId;
         product = builder.product;
         quantity = builder.quantity;
         price = builder.price;
-        subTotal = builder.subTotal;
+        subtotal = builder.subtotal;
     }
 
 
@@ -40,8 +41,8 @@ public class OrderItem extends BaseEntity<OrderItemId> {
         return price;
     }
 
-    public Money getSubTotal() {
-        return subTotal;
+    public Money getSubtotal() {
+        return subtotal;
     }
 
     void initializeOrderItem(OrderId orderId, OrderItemId orderItemId) {
@@ -52,29 +53,51 @@ public class OrderItem extends BaseEntity<OrderItemId> {
     boolean isPriceValid() {
         return price.isGreaterThanZero() &&
                 price.equals(product.getPrice()) &&
-                price.multiply(quantity).equals(subTotal);
+                price.multiply(quantity).equals(subtotal);
+    }
+
+    public static Builder builder() {
+        return new Builder();
     }
 
     public static final class Builder {
         private OrderItemId id;
-        private final Product product;
-        private final Integer quantity;
-        private final Money price;
-        private final Money subTotal;
+        private OrderId orderId;
+        private Product product;
+        private Integer quantity;
+        private Money price;
+        private Money subtotal;
 
-        private Builder(Product product, Integer quantity, Money price, Money subTotal) {
-            this.product = product;
-            this.quantity = quantity;
-            this.price = price;
-            this.subTotal = subTotal;
-        }
-
-        public static Builder builder(Product product, Integer quantity, Money price, Money subTotal) {
-            return new Builder(product, quantity, price, subTotal);
+        private Builder() {
         }
 
         public Builder id(OrderItemId val) {
             id = val;
+            return this;
+        }
+
+        public Builder orderId(OrderId val) {
+            orderId = val;
+            return this;
+        }
+
+        public Builder product(Product val) {
+            product = val;
+            return this;
+        }
+
+        public Builder quantity(Integer val) {
+            quantity = val;
+            return this;
+        }
+
+        public Builder price(Money val) {
+            price = val;
+            return this;
+        }
+
+        public Builder subtotal(Money val) {
+            subtotal = val;
             return this;
         }
 
