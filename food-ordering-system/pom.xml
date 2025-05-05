@@ -26,6 +26,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven-compiler-plugin.version>3.9.0</maven-compiler-plugin.version>
+        <dep.mockito.version>4.3.1</dep.mockito.version>
     </properties>
 
     <!-- Unifies the versions for dependencies in the child modules -->
@@ -66,6 +67,13 @@
                 <artifactId>common-domain</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-core</artifactId>
+                <version>${dep.mockito.version}</version>
+                <scope>test</scope>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
     <dependencies>
