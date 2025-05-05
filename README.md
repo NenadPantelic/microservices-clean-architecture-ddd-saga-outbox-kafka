@@ -220,5 +220,8 @@
 ![](images/order-request-simple-flow.png)
 
 - Every port will have its adapter in the domain layer or one of the infrastructure layers
+
   - input ports: interfaces implemented in the domain layer and used by client of the domain layer
   - output ports: interfaces implemented in the infrastructure layers (data access, messaging modules...) and used by the domain layer to reach those infrastructure layers
+
+- Application service is the first contact point to outside of domain, and it will forward the call to the domain service and entities to complete the business logic
