@@ -225,3 +225,35 @@
   - output ports: interfaces implemented in the infrastructure layers (data access, messaging modules...) and used by the domain layer to reach those infrastructure layers
 
 - Application service is the first contact point to outside of domain, and it will forward the call to the domain service and entities to complete the business logic
+
+## Kafka
+
+- Kafka brokers: servers run in a cluster (HA and resiliency, replication)
+- Topics: logical data unit that holds multiple partitions
+- Partitions: the smallest storage unit that holds subset of records
+- Producers: writes to end of a specific partition
+- Consumers: Reads from a partition using an offset (from start; resilient to cluster restart). A consumer belongs to a consumer group, data is read once per consumer group. So two different consumer groups will read the same data, but within the same consumer group, data is read only once.
+- Replication: Resilient and fault tolerant; defined by replication factor. E.g. replication factor 3 with 3 brokers mean that every broker will hold one replica - one partition each. Replication is then a duplication of the same piece of data across different partitions on different nodes
+- Scaling: Partition strategy. We can have parallel consumer threads up to the partition number in a topic.
+- Immutable append-only event logs (fast because it only append the data)
+  ![](images/kafka.png)<br>
+
+![](images/kafka_architecture.png)<br>
+
+- Zookeper: manages cluster, stores metadata
+- KIP-500: Removal of ZK dependency - https://www.confluent.io/blog/removing-zookeeper-dependency-in-kafka/
+- Schema registry: stores version history of all schemas by id. To maintain a strict schema on both producer and consumer.
+- Producer sends schema to schema registry and get schema id
+- Consumer retrieves schema by id
+- Data is serialized/deserialized with registered schema
+  ![](images/zk_kafka.png)
+
+- ZooKeeper healthcheck command: Check if ZK is OK -> `echo ruok | nc localhost 2181`; should return `imok` if everything is OK
+- Check Kafka cluster with an Offset Explorer -> `localhost:9000`
+
+- Notes about programming with Kafka:
+
+1. `KafkaTemplate` is a Spring component that wraps a Kafka Producer and provides methods to easily produce data on Kafka
+2. To create a Kafka consumer with Spring, using a `KafkaListener` annotation on a simple method is enough
+3. If Kafka topic has n partitions, we cannot use mora than n threads to consumer the data on topics
+4. Kafka conumser has a max poll records property that limits the number of records returned for a single poll

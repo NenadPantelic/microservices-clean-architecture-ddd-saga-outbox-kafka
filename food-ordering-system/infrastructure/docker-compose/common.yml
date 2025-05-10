@@ -1,0 +1,9 @@
+version: '3.7'
+
+networks:
+  food-ordering-system:
+    driver: bridge
+
+# 1. run the ZK -> docker-compose -f common.yml -f zookeeper.yml up
+# 2. run the Kafka cluster -> docker-compose -f common.yml -f kafka_cluster.yml up
+# 3. run the Kafka init container -> docker-compose -f common.yml -f init_kafka.yml up
