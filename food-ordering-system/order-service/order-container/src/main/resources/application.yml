@@ -1,0 +1,95 @@
+server:
+  port: 8181
+
+logging:
+  level:
+    com.food.ordering.system: DEBUG
+
+order-service:
+  payment-request-topic-name: payment-request
+  payment-response-topic-name: payment-response
+  restaurant-approval-request-topic-name: restaurant-approval-request
+  restaurant-approval-response-topic-name: restaurant-approval-response
+
+spring:
+  jpa:
+    open-in-view: false # open session in-view forces the persistence context to stay open, so that the
+    # view layer can trigger the proxy initialization. This will open a database connection for a long time which would
+    # have terrible effects on database performance. With this we are preventing that.
+    show-sql: true
+    database-platform: org.hibernate.dialect.PostgreSQL9Dialect
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQL9Dialect
+  datasource:
+    # binaryTransfer - data from Postgres server to JDBC will be transferred in binary form - faster transfer
+    # reWriteBatchedInserts - it will use a single insert with multiple records to insert, instead of multiple insert
+    # statements
+    # stringtype=unspecified - tell JDBC driver to send all strings untyped (UUID fields e.g. to prevent Postgres
+    # checking UUID type)
+    url: jdbc:postgresql://localhost:5432/postgres?currentSchema=order&binaryTransfer=true&reWriteBatchedInserts=true&stringtype=unspecified
+    username: postgres
+    password: admin
+    driver-class-name: org.postgresql.Driver
+    platform: postgres
+    schema: classpath:init-schema.sql
+    initialization-mode: always
+
+kafka-config:
+  bootstrap-servers: localhost:19092, localhost:29092, localhost:39092
+  schema-registry-url-key: schema.registry.url
+  schema-registry-url: http://localhost:8085
+  num-of-partitions: 3
+  replication-factor: 3
+
+kafka-producer-config:
+  key-serializer-class: org.apache.kafka.common.serialization.StringSerializer
+  value-serializer-class: io.confluent.kafka.serializers.KafkaAvroSerializer
+  compression-type: none # snappy, gzip, lz4, zstd; snappy is a good balance between the CPU usage, compression ratio,
+  # speed and network utilization
+  # gzip will compress more, but it is slower
+  # lz4 will compress less, but it is faster, but network bandwidth is higher (more data to transfer)
+  acks: all # Kafka producer will wait for ack from each broker, before confirming the produce operation
+  # acks: 1 - just wait for the confirmation form the target broker that gets the request from a client
+  # acks: 0 - not wait any confirmation (non-resilient system); the best practise = all
+  batch-size: 16384 # 16 KB - default value
+  batch-size-boost-factor: 100 # sends data in batches of 100
+  linger-ms: 5 # delay in producer before sending the data; if the load on producer is light, it will send the data
+  # even when batch is smaller than the above number, so we add a delay to wait a bit and get more data in batch
+  request-timeout-ms: 60000 # if no response comes in 60s, it will throw a timeout error
+  retry-count: 5 # the number of retries in case of error on producer side
+
+kafka-consumer-config:
+  key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+  value-deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
+  payment-consumer-group-id: payment-topic-consumer # offset is associated to group id, so multiple consumers belonging
+  # to the same group id will concurrently read that topic, not reading the same messages
+  # if you have a random group id, every time the application is restarted it would read the same messages again and
+  # again
+  restaurant-approval-consumer-group-id: restaurant-approval-topic-consumer
+  customer-group-id: customer-topic-consumer
+  auto-offset-reset: earliest # starts reading from the beginning
+  # setting it to `latest` will set the offset to latest, but you can then read only new data that starts coming after
+  # the service is started
+  specific-avro-reader-key: specific.avro.reader
+  specific-avro-reader: true
+  batch-listener: true # allows consuming data in batches
+  auto-startup: true # Kafka consumer starts consuming messages immediately; if set to false, it will not start
+  # automatically
+  concurrency-level: 3 # 3 threads to consume; we have 3 partitions and 3 consumers - max concurrency
+  session-timeout-ms: 10000 # timeout for heartbeats - the broker needs to get at least one heartbeat in this time span
+  # to keep the session alive; if not, it will mark the consumer as dead and remove it from the consumer group
+  # the default value is 10s
+  heartbeat-interval-ms: 3000 # frequency of sending heartbeats; 3 seconds (default value); in this case 3 heartbeats -
+  # 9s, while the timeout threshold is 10s (taking into consideration network failures), so giving some space to miss
+  # some heartbeat
+  max-poll-interval-ms: 300000 # for user threads. If the consumer processing is heavy, it will take more time than the
+  # time interval, so coordinator may mark the consumer as dead, it will leave the consumer group and coordinator will
+  # trigger a new round of re-balance to assign partitions to other available consumers.
+  max-poll-records: 500 # sets the max number of records that can be fetched in each poll
+  max-partition-fetch-bytes-default: 1048576 # max num of bytes that can be fetched in each poll; 1 MB. If 500 records
+  # size in more than 1 MB, then we cannot fetch 500, but less.
+  max-partition-fetch-bytes-boost-factor: 1
+  poll-timeout-ms: 150 # when consumer tries fetching records, if there is no record in topic, it will wait for some time
+  # and block the client code (poll method sleep). Do not set big number here, to avoid leaving a consumer wait too much
+  # and do not set it too small either to avoid wasting CPU resources (infinite loop iterating too often)
