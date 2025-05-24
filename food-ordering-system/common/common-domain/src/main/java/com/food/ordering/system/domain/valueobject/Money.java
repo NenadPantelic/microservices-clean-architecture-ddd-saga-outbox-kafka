@@ -15,7 +15,7 @@ public record Money(BigDecimal amount) {
         return amount != null && amount.compareTo(BigDecimal.ZERO) > 0;
     }
 
-    public boolean isGreater(Money money) {
+    public boolean isGreaterThan(Money money) {
         return amount != null && amount.compareTo(money.amount) > 0;
     }
 

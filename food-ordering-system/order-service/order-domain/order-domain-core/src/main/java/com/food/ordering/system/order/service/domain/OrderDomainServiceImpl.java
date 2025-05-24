@@ -1,5 +1,6 @@
 package com.food.ordering.system.order.service.domain;
 
+import com.food.ordering.system.domain.DomainConstants;
 import com.food.ordering.system.order.service.domain.entity.Order;
 import com.food.ordering.system.order.service.domain.entity.Product;
 import com.food.ordering.system.order.service.domain.entity.Restaurant;
@@ -86,6 +87,6 @@ public class OrderDomainServiceImpl implements OrderDomainService {
     }
 
     private ZonedDateTime utcTimeNow() {
-        return ZonedDateTime.now(ZoneId.of("UTC"));
+        return ZonedDateTime.now(ZoneId.of(DomainConstants.UTC));
     }
 }
