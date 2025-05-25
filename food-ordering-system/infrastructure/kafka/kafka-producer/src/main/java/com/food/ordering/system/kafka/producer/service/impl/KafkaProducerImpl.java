@@ -1,5 +1,7 @@
-package producer.service.impl;
+package com.food.ordering.system.kafka.producer.service.impl;
 
+import com.food.ordering.system.kafka.producer.exception.KafkaProducerException;
+import com.food.ordering.system.kafka.producer.service.KafkaProducer;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.avro.specific.SpecificRecordBase;
 import org.springframework.kafka.KafkaException;
@@ -8,8 +10,6 @@ import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Component;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
-import producer.exception.KafkaProducerException;
-import producer.service.KafkaProducer;
 
 import javax.annotation.PreDestroy;
 import java.io.Serializable;

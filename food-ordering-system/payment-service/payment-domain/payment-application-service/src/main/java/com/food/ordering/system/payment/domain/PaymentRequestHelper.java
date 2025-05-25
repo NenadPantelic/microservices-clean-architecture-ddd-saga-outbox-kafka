@@ -8,6 +8,9 @@ import com.food.ordering.system.payment.domain.mapper.PaymentDataMapper;
 import com.food.ordering.system.payment.domain.port.output.repository.CreditEntryRepository;
 import com.food.ordering.system.payment.domain.port.output.repository.CreditHistoryRepository;
 import com.food.ordering.system.payment.domain.port.output.repository.PaymentRepository;
+import com.food.ordering.system.payment.domain.port.output.repository.message.publisher.PaymentCancelledMessagePublisher;
+import com.food.ordering.system.payment.domain.port.output.repository.message.publisher.PaymentCompletedMessagePublisher;
+import com.food.ordering.system.payment.domain.port.output.repository.message.publisher.PaymentFailedMessagePublisher;
 import com.food.ordering.system.payment.service.domain.PaymentDomainService;
 import com.food.ordering.system.payment.service.domain.entity.CreditEntry;
 import com.food.ordering.system.payment.service.domain.entity.CreditHistory;
@@ -31,17 +34,26 @@ public class PaymentRequestHelper {
     private final PaymentRepository paymentRepository;
     private final CreditEntryRepository creditEntryRepository;
     private final CreditHistoryRepository creditHistoryRepository;
+    private final PaymentCompletedMessagePublisher paymentCompletedMessagePublisher;
+    private final PaymentCancelledMessagePublisher paymentCancelledMessagePublisher;
+    private final PaymentFailedMessagePublisher paymentFailedMessagePublisher;
 
     public PaymentRequestHelper(PaymentDomainService paymentDomainService,
                                 PaymentDataMapper paymentDataMapper,
                                 PaymentRepository paymentRepository,
                                 CreditEntryRepository creditEntryRepository,
-                                CreditHistoryRepository creditHistoryRepository) {
+                                CreditHistoryRepository creditHistoryRepository,
+                                PaymentCompletedMessagePublisher paymentCompletedMessagePublisher,
+                                PaymentCancelledMessagePublisher paymentCancelledMessagePublisher,
+                                PaymentFailedMessagePublisher paymentFailedMessagePublisher) {
         this.paymentDomainService = paymentDomainService;
         this.paymentDataMapper = paymentDataMapper;
         this.paymentRepository = paymentRepository;
         this.creditEntryRepository = creditEntryRepository;
         this.creditHistoryRepository = creditHistoryRepository;
+        this.paymentCompletedMessagePublisher = paymentCompletedMessagePublisher;
+        this.paymentCancelledMessagePublisher = paymentCancelledMessagePublisher;
+        this.paymentFailedMessagePublisher = paymentFailedMessagePublisher;
     }
 
     @Transactional
@@ -74,11 +86,14 @@ public class PaymentRequestHelper {
         PaymentEvent paymentEvent = null;
         if (paymentStatus == PaymentStatus.COMPLETED) {
             paymentEvent = paymentDomainService.validateAndInitiatePayment(
-                    payment, creditEntry, creditHistoryList, failureMessages
-            );
+                    payment, creditEntry, creditHistoryList, failureMessages,
+                    paymentCompletedMessagePublisher,
+                    paymentFailedMessagePublisher);
         } else if (paymentStatus == PaymentStatus.CANCELLED) {
             paymentEvent = paymentDomainService.validateAndCancelPayment(
-                    payment, creditEntry, creditHistoryList, failureMessages
+                    payment, creditEntry, creditHistoryList, failureMessages,
+                    paymentCancelledMessagePublisher,
+                    paymentFailedMessagePublisher
             );
         } else {
             String errMessage = String.format("Payment with status %s cannot be handled", paymentStatus);

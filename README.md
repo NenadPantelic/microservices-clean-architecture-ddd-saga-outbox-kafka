@@ -257,3 +257,10 @@
 2. To create a Kafka consumer with Spring, using a `KafkaListener` annotation on a simple method is enough
 3. If Kafka topic has n partitions, we cannot use mora than n threads to consumer the data on topics
 4. Kafka conumser has a max poll records property that limits the number of records returned for a single poll
+
+- Summary:
+
+1. Entities and domain service hold the business logic
+2. Domain events shoudl be created in entity or domain services after the related business logic is complete
+3. Application services are the first initial contact to the outside of the domain
+4. Domain events should be fired after the related business logic is persisted
