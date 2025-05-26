@@ -23,6 +23,7 @@
         <module>common</module>
         <module>infrastructure</module>
         <module>payment-service</module>
+        <module>restaurant-service</module>
     </modules>
 
     <properties>
@@ -79,6 +80,11 @@
             </dependency>
             <dependency>
                 <groupId>com.food.ordering.system</groupId>
+                <artifactId>common-dataaccess</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.food.ordering.system</groupId>
                 <artifactId>kafka-producer</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -115,6 +121,16 @@
             <dependency>
                 <groupId>com.food.ordering.system</groupId>
                 <artifactId>payment-messaging</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.food.ordering.system</groupId>
+                <artifactId>restaurant-domain-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.food.ordering.system</groupId>
+                <artifactId>restaurant-application-service</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

@@ -5,26 +5,20 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.food.ordering.system</groupId>
-        <artifactId>order-service</artifactId>
+        <artifactId>restaurant-service</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>order-data-access</artifactId>
-
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
+    <artifactId>restaurant-dataaccess</artifactId>
 
     <dependencies>
-        <!-- It will define an adapter to implement the output ports of domain layer, thus it needs the application service
-        as a dependency to reference those ports (interfaces) - data access interfaces. -->
-        <dependency>
-            <groupId>com.food.ordering.system</groupId>
-            <artifactId>order-application-service</artifactId>
-        </dependency>
         <dependency>
             <groupId>com.food.ordering.system</groupId>
             <artifactId>common-dataaccess</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.food.ordering.system</groupId>
+            <artifactId>restaurant-application-service</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
