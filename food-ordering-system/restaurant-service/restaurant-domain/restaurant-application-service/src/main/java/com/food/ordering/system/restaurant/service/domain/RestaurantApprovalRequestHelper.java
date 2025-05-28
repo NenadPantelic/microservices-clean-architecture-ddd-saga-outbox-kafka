@@ -2,10 +2,8 @@ package com.food.ordering.system.restaurant.service.domain;
 
 import com.food.ordering.system.domain.valueobject.OrderId;
 import com.food.ordering.system.restaurant.service.domain.dto.RestaurantApprovalRequest;
-import com.food.ordering.system.restaurant.service.domain.entity.OrderApproval;
 import com.food.ordering.system.restaurant.service.domain.entity.Restaurant;
 import com.food.ordering.system.restaurant.service.domain.event.OrderApprovalEvent;
-import com.food.ordering.system.restaurant.service.domain.event.OrderApprovedEvent;
 import com.food.ordering.system.restaurant.service.domain.exception.RestaurantNotFoundException;
 import com.food.ordering.system.restaurant.service.domain.mapper.RestaurantDataMapper;
 import com.food.ordering.system.restaurant.service.domain.port.output.message.publisher.OrderApprovedMessagePublisher;

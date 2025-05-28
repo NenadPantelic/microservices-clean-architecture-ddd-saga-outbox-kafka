@@ -17,14 +17,6 @@ import java.util.UUID;
 @Slf4j
 public class RestaurantDomainServiceImpl implements RestaurantDomainService {
 
-    private final DomainEventPublisher<OrderApprovedEvent> orderApprovedEventDomainEventPublisher;
-    private final DomainEventPublisher<OrderRejectedEvent> orderRejectedEventDomainEventPublisher;
-
-    public RestaurantDomainServiceImpl(DomainEventPublisher<OrderApprovedEvent> orderApprovedEventDomainEventPublisher,
-                                       DomainEventPublisher<OrderRejectedEvent> orderRejectedEventDomainEventPublisher) {
-        this.orderApprovedEventDomainEventPublisher = orderApprovedEventDomainEventPublisher;
-        this.orderRejectedEventDomainEventPublisher = orderRejectedEventDomainEventPublisher;
-    }
 
     @Override
     public OrderApprovalEvent validateOrder(Restaurant restaurant,
