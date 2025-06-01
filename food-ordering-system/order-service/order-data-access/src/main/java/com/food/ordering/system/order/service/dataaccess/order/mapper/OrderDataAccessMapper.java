@@ -4,6 +4,7 @@ import com.food.ordering.system.domain.valueobject.*;
 import com.food.ordering.system.order.service.dataaccess.order.entity.OrderAddressEntity;
 import com.food.ordering.system.order.service.dataaccess.order.entity.OrderEntity;
 import com.food.ordering.system.order.service.dataaccess.order.entity.OrderItemEntity;
+import com.food.ordering.system.order.service.domain.constant.MessageConstant;
 import com.food.ordering.system.order.service.domain.entity.Order;
 import com.food.ordering.system.order.service.domain.entity.OrderItem;
 import com.food.ordering.system.order.service.domain.entity.Product;
@@ -20,7 +21,6 @@ import java.util.stream.Collectors;
 @Component
 public class OrderDataAccessMapper {
 
-    private static final String FAILURE_MESSAGE_DELIMITER = ",";
 
     public OrderEntity orderToOrderEntity(Order order) {
         List<String> failureMessages = order.getFailureMessages();
@@ -33,7 +33,7 @@ public class OrderDataAccessMapper {
                 .price(order.getPrice().amount())
                 .items(orderItemsToOrderItemEntities(order.getItems()))
                 .failureMessages(failureMessages != null ?
-                        String.join(FAILURE_MESSAGE_DELIMITER, failureMessages) : "")
+                        String.join(MessageConstant.FAILURE_MESSAGE_DELIMITER, failureMessages) : "")
                 .build();
 
         orderEntity.getAddress().setOrder(orderEntity);
@@ -55,7 +55,7 @@ public class OrderDataAccessMapper {
                 .failureMessages(new ArrayList<>(
                                 // unmodifiable list -> convert to modifiable
                                 Arrays.asList(
-                                        orderEntity.getFailureMessages().split(FAILURE_MESSAGE_DELIMITER))
+                                        orderEntity.getFailureMessages().split(MessageConstant.FAILURE_MESSAGE_DELIMITER))
                         )
                 )
                 .build();

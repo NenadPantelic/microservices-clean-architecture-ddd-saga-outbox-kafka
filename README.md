@@ -264,3 +264,52 @@
 2. Domain events shoudl be created in entity or domain services after the related business logic is complete
 3. Application services are the first initial contact to the outside of the domain
 4. Domain events should be fired after the related business logic is persisted
+
+## Saga
+
+- SAGA: Distributed long running transactions across services. Used for Long Lived Transactions (LLT).
+- First invented in a publication on 1987: https://www.cs.cornell.edu/andru/cs711/2002fa/reading/sagas.pdf
+- Chain of local ACID transactions to finalize a long running transaction across services. Compensating transactions: Rollback in case of a failure
+
+```java
+
+public interface SagaStep<T, S extends DomainEvent, U extends DomainEvent> {
+
+  S process(T data);
+  U rollback(T data);
+}
+```
+
+![](images/saga-2.png)
+
+- kafkatool
+- Note:
+  1. Saga is difficult to debug as multiple services are involved. So, it is crucial to have a robust tracing implementations, with trace and span id
+  2. As a result of compensating transaction, when the user sees a change, in the second look after some time, that change could be removed. Users should be aware of that.
+
+#### Happy path flow example
+
+1. Order service creates an `OrderCreated` event which goes to `payment-request-topic` in Kafka; order is in `PENDING` state
+2. That event is processed by Payment service
+3. Payment service then fires a `PaymentCompleted` event to `payment-response-topic`
+4. Order service consumes that event and publishes a new event - `OrderPaid` event which is published to `restaurant-approval-request-topic`; order is in `PAID` state
+5. The same event is handled by Restaurant service
+6. It then fires a `OrderApproved` event to `restaurant-approval-response-topic`; order is in `APPROVED` state
+
+#### Negative scenario 1 - payment failed
+
+1. Order service creates an `OrderCreated` event which goes to `payment-request-topic` in Kafka; order is in `PENDING` state
+2. That event is processed by Payment service
+3. If the user has no enough resources to pay an order, it is rejected (cancelled or failed) - it fires a `PaymentFailed` event to `payment-response-topic`
+4. Order service receives it and cancels the event; order is in `CANCELLED` state
+
+#### Negative scenario 2 - restaurant rejected an order
+
+1. Order service creates an `OrderCreated` event which goes to `payment-request-topic` in Kafka; order is in `PENDING` state
+2. That event is processed by Payment service
+3. Payment service then fires a `PaymentCompleted` event to `payment-response-topic`
+4. Order service consumes that event and publishes a new event - `OrderPaid` event which is published to `restaurant-approval-request-topic`; order is in `PAID` state
+5. The same event is handled by Restaurant service. If this request cannot be approved (ordering an unavailable product), it fires a `OrderRejectedEvent` event to `restaurant-approval-response-topic`
+6. This event is handled by Order service - it sets the order status to `CANCELLING` and calls a compensating transaction by sending a `OrderCancelEvent` to `payment-request-topic`. It is received by Payment service; order is in `CANCELLING` state
+7. The payment service will cancel payment, i.e. adjust the credit and fire a `PaymentCancelledEvent` to `payment-response-topic`
+8. Order service receives it and set the order status to `CANCELLED`; order is in `CANCELLED` state
