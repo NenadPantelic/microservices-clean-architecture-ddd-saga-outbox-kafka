@@ -45,6 +45,6 @@ public class OrderTestConfiguration {
 
     @Bean
     public OrderDomainService orderDomainService() {
-        return new OrderDomainServiceImpl(orderCreatedEventDomainEventPublisher, orderCancelledEventDomainEventPublisher, orderPaidEventDomainEventPublisher);
+        return new OrderDomainServiceImpl();
     }
 }

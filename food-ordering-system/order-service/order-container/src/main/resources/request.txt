@@ -1,0 +1,2 @@
+1. POST /orders -> order.json
+2. kafkacat -C -b localhost:19092 -t payment-request
