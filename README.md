@@ -313,3 +313,19 @@ public interface SagaStep<T, S extends DomainEvent, U extends DomainEvent> {
 6. This event is handled by Order service - it sets the order status to `CANCELLING` and calls a compensating transaction by sending a `OrderCancelEvent` to `payment-request-topic`. It is received by Payment service; order is in `CANCELLING` state
 7. The payment service will cancel payment, i.e. adjust the credit and fire a `PaymentCancelledEvent` to `payment-response-topic`
 8. Order service receives it and set the order status to `CANCELLED`; order is in `CANCELLED` state
+
+## Outbox Pattern
+
+- If we first commit the local transaction and then publish an event, what happens if the event publishing goes wrong? We will have an incosistent state.
+- If we first fire an event and then commit the local transaction, if the transaction goes wrong we will publish the wrong event
+- Help the use of local transactions to let consisent (eventual) distributed transactions
+- It will complete SAGA in a safe and consistent way
+- Persist events in a local database automatically with ACID transaction
+- Read the events and publish
+  - Pulling Outbox table: Pull events with a scheduler
+  - Change Data Capture: Listen transaction logs
+- Keep track of SAGA and order status in Outbox table
+- Ensure idempotency: Do not consume same data
+- Optimistic locks and DB constraints: prevent data corruption
+
+![](images/outbox.png)
