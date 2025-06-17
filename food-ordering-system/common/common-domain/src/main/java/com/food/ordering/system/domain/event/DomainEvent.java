@@ -5,5 +5,4 @@ package com.food.ordering.system.domain.event;
 // e.g. if the event type is OrderCreatedEvent, this generic will be Order
 public interface DomainEvent<T> {
 
-    void fire();
 }

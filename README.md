@@ -329,3 +329,16 @@ public interface SagaStep<T, S extends DomainEvent, U extends DomainEvent> {
 - Optimistic locks and DB constraints: prevent data corruption
 
 ![](images/outbox.png)
+
+### Optimistic locking
+
+- we have a version field
+- whenever a process updates the row, it increases the version value
+- if the process tries to update the row and the version value it sends is the same/lower than the current one, an exception is thrown and the rollback is triggered - the downside in case we have frequent rollbacks
+
+- Another scenario:
+  - T1 updates and saves an outbox object, but the transaction is not complete
+  - T2's behavior (whether it will find the outbox message) depends on the isolation level:
+    - READ UNCOMMITED: will not find it, even if uncommited, the data is changed (it's not in STARTED state); T2 will return immediately
+    - READ COMMITTED (default in Postgres): it will return an empty result, because it will wait for T1 to commit its changes, so the outbox message will be updated
+    -
