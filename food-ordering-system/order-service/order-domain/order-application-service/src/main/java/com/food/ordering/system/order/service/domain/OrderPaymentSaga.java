@@ -80,7 +80,7 @@ public class OrderPaymentSaga implements SagaStep<PaymentResponse> {
         OrderPaymentOutboxMessage orderPaymentOutboxMessage = paymentOutboxMessageOptional.get();
         OrderPaidEvent orderPaidEvent = completeOrderPayment(paymentResponse);
 
-        SagaStatus sagaStatus = orderSagaHelper.orderStatusToSagaStatus(orderPaidEvent.getOrder().getOrderStatus());
+        SagaStatus sagaStatus = orderSagaHelper.orderStatusToSagaStatus(orderPaidEvent.getOrder().getStatus());
         OrderPaymentOutboxMessage updatedPaymentOutboxMessage = getUpdatedPaymentOutboxMessage(
                 orderPaymentOutboxMessage,
                 orderPaymentOutboxMessage.getOrderStatus(),
@@ -89,7 +89,7 @@ public class OrderPaymentSaga implements SagaStep<PaymentResponse> {
         paymentOutboxHelper.save(updatedPaymentOutboxMessage);
         approvalOutboxHelper.saveApprovalOutboxMessage(
                 orderDataMapper.orderPaidEventToOrderApprovalEventPayload(orderPaidEvent),
-                orderPaidEvent.getOrder().getOrderStatus(),
+                orderPaidEvent.getOrder().getStatus(),
                 sagaStatus,
                 OutboxStatus.STARTED,
                 UUID.fromString(paymentResponse.sagaId())
@@ -112,17 +112,17 @@ public class OrderPaymentSaga implements SagaStep<PaymentResponse> {
         }
         OrderPaymentOutboxMessage orderPaymentOutboxMessage = paymentOutboxMessageOptional.get();
         Order order = rollbackOrderPayment(paymentResponse);
-        SagaStatus sagaStatus = orderSagaHelper.orderStatusToSagaStatus(order.getOrderStatus());
+        SagaStatus sagaStatus = orderSagaHelper.orderStatusToSagaStatus(order.getStatus());
         OrderPaymentOutboxMessage updatedPaymentOutboxMessage = getUpdatedPaymentOutboxMessage(
                 orderPaymentOutboxMessage,
-                order.getOrderStatus(),
+                order.getStatus(),
                 sagaStatus
         );
         paymentOutboxHelper.save(updatedPaymentOutboxMessage);
         if (paymentResponse.paymentStatus() == PaymentStatus.CANCELLED) {
             OrderApprovalOutboxMessage updatedApprovalOutboxMessage = getUpdatedApprovalOutboxMessage(
                     paymentResponse.sagaId(),
-                    order.getOrderStatus(),
+                    order.getStatus(),
                     sagaStatus
             );
             approvalOutboxHelper.save(updatedApprovalOutboxMessage);

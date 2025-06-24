@@ -41,8 +41,8 @@ public class OrderCreateCommandHandler {
         );
         paymentOutboxHelper.savePaymentOutboxMessage(
                 orderDataMapper.orderCreatedEventToOrderPaymentEventPayload(orderCreatedEvent),
-                orderCreatedEvent.getOrder().getOrderStatus(),
-                orderSagaHelper.orderStatusToSagaStatus(orderCreatedEvent.getOrder().getOrderStatus()),
+                orderCreatedEvent.getOrder().getStatus(),
+                orderSagaHelper.orderStatusToSagaStatus(orderCreatedEvent.getOrder().getStatus()),
                 OutboxStatus.STARTED,
                 UUID.randomUUID()
         );

@@ -21,13 +21,13 @@ public class Order extends AggregateRoot<OrderId> {
 
     // updatable fields
     private TrackingId trackingId;
-    private OrderStatus orderStatus;
+    private OrderStatus status;
     private List<String> failureMessages;
 
     public void initializeOrder() {
         setId(new OrderId(UUID.randomUUID()));
         trackingId = new TrackingId(UUID.randomUUID());
-        orderStatus = OrderStatus.PENDING;
+        status = OrderStatus.PENDING;
         initializeOrderItems();
     }
 
@@ -38,44 +38,44 @@ public class Order extends AggregateRoot<OrderId> {
     }
 
     public void pay() {
-        if (orderStatus != OrderStatus.PENDING) {
+        if (status != OrderStatus.PENDING) {
             throw new OrderDomainException("Order is not in correct state for pay operation");
         }
 
-        orderStatus = OrderStatus.PAID;
+        status = OrderStatus.PAID;
     }
 
     public void approve() {
-        if (orderStatus != OrderStatus.PAID) {
+        if (status != OrderStatus.PAID) {
             throw new OrderDomainException("Order is not in correct state for approve operation");
         }
 
-        orderStatus = OrderStatus.APPROVED;
+        status = OrderStatus.APPROVED;
     }
 
     public void initCancel(List<String> failureMessages) {
-        if (orderStatus != OrderStatus.PAID) {
+        if (status != OrderStatus.PAID) {
             throw new OrderDomainException("Order is not in correct state for initCancel operation");
         }
 
-        orderStatus = OrderStatus.CANCELLING;
+        status = OrderStatus.CANCELLING;
         updateFailureMessages(failureMessages);
     }
 
 
     public void cancel(List<String> failureMessages) {
-        if (!(orderStatus == OrderStatus.CANCELLING || orderStatus == OrderStatus.PENDING)) {
+        if (!(status == OrderStatus.CANCELLING || status == OrderStatus.PENDING)) {
             throw new OrderDomainException("Order is not in correct state for cancel operation");
         }
 
-        orderStatus = OrderStatus.CANCELLED;
+        status = OrderStatus.CANCELLED;
         updateFailureMessages(failureMessages);
     }
 
     private void validateInitialOrder() {
         // since it is an initial order, these fields must not be set prior
         // to that
-        if (orderStatus != null && getId() != null) {
+        if (status != null && getId() != null) {
             throw new OrderDomainException("Order is not in correct state for initialization!");
         }
     }
@@ -138,7 +138,7 @@ public class Order extends AggregateRoot<OrderId> {
         price = builder.price;
         items = builder.items;
         trackingId = builder.trackingId;
-        orderStatus = builder.orderStatus;
+        status = builder.orderStatus;
         failureMessages = builder.failureMessages;
     }
 
@@ -166,8 +166,8 @@ public class Order extends AggregateRoot<OrderId> {
         return trackingId;
     }
 
-    public OrderStatus getOrderStatus() {
-        return orderStatus;
+    public OrderStatus getStatus() {
+        return status;
     }
 
     public List<String> getFailureMessages() {

@@ -40,11 +40,11 @@ public class PaymentDomainServiceImpl implements PaymentDomainService {
         if (failureMessages.isEmpty()) {
             log.info("Payment is initiated for order[id = {}]", payment.getOrderId().getValue());
             payment.updateStatus(PaymentStatus.COMPLETED);
-            return new PaymentCompletedEvent(payment, currentUTCTime(), paymentCompletedEventDomainEventPublisher);
+            return new PaymentCompletedEvent(payment, currentUTCTime());
         } else {
             log.info("Payment initialization failed for order[id = {}]", payment.getOrderId().getValue());
             payment.updateStatus(PaymentStatus.FAILED);
-            return new PaymentFailedEvent(payment, currentUTCTime(), failureMessages, paymentFailedEventDomainEventPublisher);
+            return new PaymentFailedEvent(payment, currentUTCTime(), failureMessages);
         }
     }
 
@@ -62,11 +62,11 @@ public class PaymentDomainServiceImpl implements PaymentDomainService {
         if (failureMessages.isEmpty()) {
             log.info("Payment is cancelled for order[id = {}]", payment.getOrderId().getValue());
             payment.updateStatus(PaymentStatus.CANCELLED);
-            return new PaymentCancelledEvent(payment, currentUTCTime(), paymentCancelledEventDomainEventPublisher);
+            return new PaymentCancelledEvent(payment, currentUTCTime());
         } else {
             log.info("Payment cancellation failed for order[id = {}]", payment.getOrderId().getValue());
             payment.updateStatus(PaymentStatus.FAILED);
-            return new PaymentFailedEvent(payment, currentUTCTime(), failureMessages, paymentFailedEventDomainEventPublisher);
+            return new PaymentFailedEvent(payment, currentUTCTime(), failureMessages);
         }
     }
 

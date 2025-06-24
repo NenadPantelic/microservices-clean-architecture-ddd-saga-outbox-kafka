@@ -1,5 +1,7 @@
 package com.food.ordering.system.order.service.domain;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.food.ordering.system.domain.valueobject.*;
 import com.food.ordering.system.order.service.domain.dto.create.CreateOrderCommand;
 import com.food.ordering.system.order.service.domain.dto.create.CreateOrderResponse;
@@ -11,10 +13,16 @@ import com.food.ordering.system.order.service.domain.entity.Product;
 import com.food.ordering.system.order.service.domain.entity.Restaurant;
 import com.food.ordering.system.order.service.domain.exception.OrderDomainException;
 import com.food.ordering.system.order.service.domain.mapper.OrderDataMapper;
+import com.food.ordering.system.order.service.domain.outbox.model.payment.OrderPaymentEventPayload;
+import com.food.ordering.system.order.service.domain.outbox.model.payment.OrderPaymentOutboxMessage;
 import com.food.ordering.system.order.service.domain.port.input.service.OrderApplicationService;
 import com.food.ordering.system.order.service.domain.port.output.repository.CustomerRepository;
 import com.food.ordering.system.order.service.domain.port.output.repository.OrderRepository;
+import com.food.ordering.system.order.service.domain.port.output.repository.PaymentOutboxRepository;
 import com.food.ordering.system.order.service.domain.port.output.repository.RestaurantRepository;
+import com.food.ordering.system.outbox.OutboxStatus;
+import com.food.ordering.system.saga.SagaStatus;
+import com.food.ordering.system.saga.order.SagaConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -24,9 +32,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.math.BigDecimal;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
+import static com.food.ordering.system.saga.order.SagaConstants.ORDER_SAGA_NAME;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS) // for each method a new instance of the class is created
 // if it has a different Lifecycle mode, beforeAll method must be static and also all fields must be static
@@ -48,6 +59,12 @@ class OrderApplicationServiceTest {
     @Autowired // use a bean from OrderTestConfiguration
     private RestaurantRepository restaurantRepository;
 
+    @Autowired
+    private PaymentOutboxRepository paymentOutboxRepository;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
     private CreateOrderCommand createdOrderCommand;
     private CreateOrderCommand createOrderCommandWrongPrice;
     private CreateOrderCommand createOrderCommandWrongProductPrice;
@@ -58,6 +75,7 @@ class OrderApplicationServiceTest {
     private static final UUID INACTIVE_RESTAURANT_ID = UUID.randomUUID();
     private static final UUID PRODUCT_ID = UUID.randomUUID();
     private static final UUID ORDER_ID = UUID.randomUUID();
+    private static final UUID SAGA_ID = UUID.randomUUID();
     private static final BigDecimal PRICE = new BigDecimal("200.00");
 
 
@@ -185,6 +203,9 @@ class OrderApplicationServiceTest {
         Mockito.doReturn(Optional.of(restaurant)).when(restaurantRepository)
                 .findRestaurantInformation(orderDataMapper.createOrderCommandToRestaurant(createdOrderCommand));
         Mockito.doReturn(order).when(orderRepository).save(Mockito.any(Order.class));
+        Mockito.doReturn(getOrderPaymentOutboxMessage())
+                .when(paymentOutboxRepository)
+                .save(Mockito.any(OrderPaymentOutboxMessage.class));
     }
 
     @Test
@@ -214,7 +235,7 @@ class OrderApplicationServiceTest {
         Assertions.assertEquals(
                 "Order item price 60.00 is not valid for product " + PRODUCT_ID,
                 orderDomainException.getMessage()
-                );
+        );
     }
 
     @Test
@@ -238,6 +259,37 @@ class OrderApplicationServiceTest {
                 "Restaurant[id = " + INACTIVE_RESTAURANT_ID + "] is not active",
                 orderDomainException.getMessage()
         );
+    }
+
+
+    private OrderPaymentOutboxMessage getOrderPaymentOutboxMessage() {
+        OrderPaymentEventPayload orderPaymentEventPayload = OrderPaymentEventPayload.builder()
+                .orderId(ORDER_ID.toString())
+                .customerId(CUSTOMER_ID.toString())
+                .price(PRICE)
+                .createdAt(ZonedDateTime.now())
+                .paymentOrderStatus(PaymentOrderStatus.PENDING.name())
+                .build();
+
+        return OrderPaymentOutboxMessage.builder()
+                .id(UUID.randomUUID())
+                .sagaId(SAGA_ID)
+                .createdAt(ZonedDateTime.now())
+                .type(SagaConstants.ORDER_SAGA_NAME)
+                .payload(createPayload(orderPaymentEventPayload))
+                .orderStatus(OrderStatus.PENDING)
+                .sagaStatus(SagaStatus.STARTED)
+                .outboxStatus(OutboxStatus.STARTED)
+                .version(0)
+                .build();
+    }
+
+    private String createPayload(OrderPaymentEventPayload orderPaymentEventPayload) {
+        try {
+            return objectMapper.writeValueAsString(orderPaymentEventPayload);
+        } catch (JsonProcessingException e) {
+            throw new OrderDomainException("Cannot create OrderPaymentEventPayload object!");
+        }
     }
 
 }

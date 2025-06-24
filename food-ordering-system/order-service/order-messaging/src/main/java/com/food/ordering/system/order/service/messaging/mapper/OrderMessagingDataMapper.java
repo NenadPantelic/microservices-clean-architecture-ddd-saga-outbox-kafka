@@ -57,7 +57,7 @@ public class OrderMessagingDataMapper {
                 .setSagaId("")
                 .setOrderId(order.getId().getValue().toString())
                 .setRestaurantId(order.getRestaurantId().getValue().toString())
-                .setRestaurantOrderStatus(RestaurantOrderStatus.valueOf(order.getOrderStatus().toString()))
+                .setRestaurantOrderStatus(RestaurantOrderStatus.valueOf(order.getStatus().toString()))
                 .setProducts(products)
                 .setPrice(order.getPrice().amount())
                 .setCreatedAt(orderPaidEvent.getCreatedAt().toInstant())
