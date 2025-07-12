@@ -1,6 +1,6 @@
 package com.food.ordering.system.payment.service.dataaccess.payment.adapter;
 
-import com.food.ordering.system.payment.domain.port.output.repository.PaymentRepository;
+import com.food.ordering.system.payment.service.domain.port.output.repository.PaymentRepository;
 import com.food.ordering.system.payment.service.dataaccess.payment.mapper.PaymentDataAccessMapper;
 import com.food.ordering.system.payment.service.dataaccess.payment.repository.PaymentJpaRepository;
 import com.food.ordering.system.payment.service.domain.entity.Payment;

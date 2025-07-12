@@ -1,6 +1,6 @@
 package com.food.ordering.system.payment.service.dataaccess.creditentry.adapter;
 
-import com.food.ordering.system.payment.domain.port.output.repository.CreditEntryRepository;
+import com.food.ordering.system.payment.service.domain.port.output.repository.CreditEntryRepository;
 import com.food.ordering.system.payment.service.dataaccess.creditentry.mapper.CreditEntryDataAccessMapper;
 import com.food.ordering.system.payment.service.dataaccess.creditentry.repository.CreditEntryJpaRepository;
 import com.food.ordering.system.payment.service.domain.entity.CreditEntry;
