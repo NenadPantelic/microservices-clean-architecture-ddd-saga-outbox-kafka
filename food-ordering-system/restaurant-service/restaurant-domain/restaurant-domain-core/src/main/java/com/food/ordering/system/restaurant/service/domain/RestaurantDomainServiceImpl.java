@@ -1,7 +1,6 @@
 package com.food.ordering.system.restaurant.service.domain;
 
 import com.food.ordering.system.domain.DomainConstants;
-import com.food.ordering.system.domain.event.publisher.DomainEventPublisher;
 import com.food.ordering.system.domain.valueobject.OrderApprovalStatus;
 import com.food.ordering.system.restaurant.service.domain.entity.Restaurant;
 import com.food.ordering.system.restaurant.service.domain.event.OrderApprovalEvent;
@@ -20,9 +19,7 @@ public class RestaurantDomainServiceImpl implements RestaurantDomainService {
 
     @Override
     public OrderApprovalEvent validateOrder(Restaurant restaurant,
-                                            List<String> failureMessages,
-                                            DomainEventPublisher<OrderApprovedEvent> orderApprovedEventDomainEventPublisher,
-                                            DomainEventPublisher<OrderRejectedEvent> orderRejectedEventDomainEventPublisher) {
+                                            List<String> failureMessages) {
         restaurant.validateOrder(failureMessages);
         UUID orderId = restaurant.getOrderDetail().getId().getValue();
         log.info("Validating order with id {}", orderId);
@@ -34,8 +31,7 @@ public class RestaurantDomainServiceImpl implements RestaurantDomainService {
                     restaurant.getOrderApproval(),
                     restaurant.getId(),
                     failureMessages,
-                    currentUtcTime(),
-                    orderApprovedEventDomainEventPublisher
+                    currentUtcTime()
             );
         }
 
@@ -46,8 +42,7 @@ public class RestaurantDomainServiceImpl implements RestaurantDomainService {
                 restaurant.getOrderApproval(),
                 restaurant.getId(),
                 failureMessages,
-                currentUtcTime(),
-                orderRejectedEventDomainEventPublisher
+                currentUtcTime()
         );
     }
 
